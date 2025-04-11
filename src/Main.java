@@ -51,11 +51,5 @@ public class Main {
                 new Interface(bateauVoyageurs);  // Création de la fenêtre graphique
             }
         });
-        // Création du PDF avec la liste des bateaux
-        try {
-            Pdf.createPdf("test.pdf", bateauVoyageurs);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

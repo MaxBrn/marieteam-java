@@ -201,7 +201,8 @@ public class Interface extends JFrame {
 
         buttonPdf.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String filePath = "appli.pdf";
+                String userHome = System.getProperty("user.home");
+                String filePath = userHome + "/Desktop/FlotteMarieteam.pdf";
                 try {
                     Pdf.createPdf(filePath, bateaux);
 
