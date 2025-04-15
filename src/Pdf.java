@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public class Pdf {
 
@@ -48,7 +49,7 @@ public class Pdf {
             // Colonne 2 : Image du bateau
             PdfPCell imageCell = new PdfPCell();
             if (bateauVoyageur.getImage() != null) {
-                Image imageBateau = Image.getInstance(bateauVoyageur.getImage());
+                Image imageBateau = Image.getInstance(Objects.requireNonNull(Pdf.class.getResource(bateauVoyageur.getImage())));
                 imageBateau.scaleToFit(200, 200);  // Ajuster la taille de l'image si nécessaire
                 imageCell.addElement(imageBateau);
             }
@@ -78,7 +79,8 @@ public class Pdf {
         @Override
         public void onOpenDocument(PdfWriter writer, Document document) {
             try {
-                logo = Image.getInstance("/Users/maxime/Desktop/marieteam-java/src/ressources/images/logoMarieteam.png");
+                // Chargement de l'image avec getResource pour un chemin relatif
+                logo = Image.getInstance(Objects.requireNonNull(getClass().getResource("/logoMarieteam.png")));
                 logo.scaleToFit(80, 80);
             } catch (BadElementException | IOException e) {
                 e.printStackTrace();

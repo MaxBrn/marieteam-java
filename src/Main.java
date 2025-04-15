@@ -32,11 +32,11 @@ public class Main {
         equipementList5.add(equipement5);
 
         // Création des bateaux
-        BateauVoyageur bateauVoyageur1 = new BateauVoyageur("1", "Boaty", 5.13, 3.3, 40, equipementList1, "/Users/maxime/Desktop/marieteam-java/src/ressources/images/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur2 = new BateauVoyageur("2", "Goaty", 4.13, 3.13, 50, equipementList2, "/Users/maxime/Desktop/marieteam-java/src/ressources/images/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur3 = new BateauVoyageur("3", "Saily", 6.5, 3.8, 60, equipementList3, "/Users/maxime/Desktop/marieteam-java/src/ressources/images/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur4 = new BateauVoyageur("4", "Wavey", 5.8, 3.5, 55, equipementList4, "/Users/maxime/Desktop/marieteam-java/src/ressources/images/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur5 = new BateauVoyageur("5", "Splashy", 4.5, 3.0, 45, equipementList5, "/Users/maxime/Desktop/marieteam-java/src/ressources/images/imageAccueil.jpg");
+        BateauVoyageur bateauVoyageur1 = new BateauVoyageur("1", "Boaty", 5.13, 3.3, 40, equipementList1, "/imageAccueil.jpg");
+        BateauVoyageur bateauVoyageur2 = new BateauVoyageur("2", "Goaty", 4.13, 3.13, 50, equipementList2, "/imageAccueil.jpg");
+        BateauVoyageur bateauVoyageur3 = new BateauVoyageur("3", "Saily", 6.5, 3.8, 60, equipementList3, "/imageAccueil.jpg");
+        BateauVoyageur bateauVoyageur4 = new BateauVoyageur("4", "Wavey", 5.8, 3.5, 55, equipementList4, "/imageAccueil.jpg");
+        BateauVoyageur bateauVoyageur5 = new BateauVoyageur("5", "Splashy", 4.5, 3.0, 45, equipementList5, "/imageAccueil.jpg");
 
         // Liste des bateaux
         List<BateauVoyageur> bateauVoyageurs = new ArrayList<>();
