@@ -321,38 +321,63 @@ public class Interface extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 DatabaseQuery databaseQuery = new DatabaseQuery();
                 BateauVoyageur b = (BateauVoyageur) comboBox.getSelectedItem();
+                if (b == null) return;
+
                 String nomBateau = nameField.getText().trim();
-                Double longueurBateau = Double.parseDouble(longueurField.getText().trim());
-                Double largeurBateau = Double.parseDouble(largeurField.getText().trim());
-                Double vitesseBatVoy = Double.parseDouble(vitesseField.getText().trim());
-                if (nomBateau.isEmpty() || longueurBateau < 0 || largeurBateau < 0 || vitesseBatVoy < 0) {
+
+                try {
+                    Double longueurBateau = Double.parseDouble(longueurField.getText().trim());
+                    Double largeurBateau = Double.parseDouble(largeurField.getText().trim());
+                    Double vitesseBatVoy = Double.parseDouble(vitesseField.getText().trim());
+                    String image = urlField.getText().trim();
+
+                    if (nomBateau.isEmpty() || longueurBateau < 0 || largeurBateau < 0 || vitesseBatVoy < 0) {
+                        JOptionPane.showMessageDialog(Interface.this,
+                                "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                        "Veuillez remplir tous les champs.</div></html>",
+                                "Erreur",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    Boolean update = databaseQuery.updateBateau(b.getIdBateau(), nomBateau, largeurBateau, longueurBateau
+                            , vitesseBatVoy, image);
+                    if(update) {
+                        // Mise à jour complète de l'objet
+                        b.setNomBateau(nomBateau);
+                        b.setLongueurBateau(longueurBateau);
+                        b.setLargeurBateau(largeurBateau);
+                        b.setVitesseBatVoy(vitesseBatVoy);
+                        b.setImage(image);
+
+                        // Mettre à jour l'objet dans la HashMap
+                        bateaux.put(b.getIdBateau(), b);
+
+                        // Rafraîchir correctement la comboBox
+                        int selectedIndex = comboBox.getSelectedIndex();
+                        comboBox.removeItemAt(selectedIndex);
+                        comboBox.insertItemAt(b, selectedIndex);
+                        comboBox.setSelectedIndex(selectedIndex);
+
+                        JOptionPane.showMessageDialog(Interface.this,
+                                "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                        "Les modifications ont été sauvegardées.</div></html>",
+                                "Sauvegarde",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(Interface.this,
+                                "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                        "Une erreur est survenue lors de la sauvegarde des modifications.</div></html>",
+                                "Erreur",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(Interface.this,
                             "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
-                                    "Veuillez remplir tous les champs.</div></html>",
+                                    "Veuillez entrer des valeurs numériques valides pour la longueur, largeur et vitesse.</div></html>",
                             "Erreur",
                             JOptionPane.ERROR_MESSAGE);
-                    return;
                 }
-                Boolean update= databaseQuery.updateBateau(b.getIdBateau(), nomBateau, longueurBateau, largeurBateau,vitesseBatVoy);
-                if(update) {
-                    BateauVoyageur bateau = new BateauVoyageur(b.getIdBateau(), nomBateau,largeurBateau,longueurBateau,vitesseBatVoy,null,"/imageAccueil.jpg");
-                    bateaux.put(b.getIdBateau(), bateau);
-                    ((BateauVoyageur) comboBox.getSelectedItem()).setNomBateau(nomBateau);
-                    JOptionPane.showMessageDialog(Interface.this,
-                            "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
-                                    "Les modifications ont été sauvegardées.</div></html>",
-                            "Sauvegarde",
-                            JOptionPane.INFORMATION_MESSAGE);
-
-                }
-                else {
-                    JOptionPane.showMessageDialog(Interface.this,
-                            "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
-                                    "Une erreur est survenue lors de la sauvegarde des modifications.</div></html>",
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-
             }
         });
         // Logique pour l'ajout d'équipement

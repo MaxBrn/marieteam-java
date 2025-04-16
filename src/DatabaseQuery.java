@@ -39,14 +39,14 @@ public class DatabaseQuery {
         return bateaux;
     }
 
-    public static Boolean updateBateau(int id, String nom, double largeur, double longueur, double vitesse) {
+    public static Boolean updateBateau(int id, String nom, double largeur, double longueur, double vitesse, String image) {
 
         try {
             Connection conn = DatabaseConnection.getConnection();
             System.out.println("✅ Connexion réussie à Supabase !");
             System.out.println(id);
             String query = "UPDATE bateau SET nom = '" + nom + "', largeur = " + largeur +
-                    ", longueur = " + longueur + ", vitesse = " + vitesse +
+                    ", longueur = " + longueur + ", vitesse = " + vitesse + ", ImageUrl = '" + image + "'" +
                     " WHERE id = " + id;
 
             try {
