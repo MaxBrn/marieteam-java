@@ -7,7 +7,7 @@ public class BateauVoyageur extends Bateau {
     private List<Equipement> equipements;
     private String image;
 
-    public BateauVoyageur(String idBateau, String nomBateau, double largeurBateau, double longueurBateaut
+    public BateauVoyageur(Integer idBateau, String nomBateau, double largeurBateau, double longueurBateaut
                           ,double vitesseBatVoy, List<Equipement> equipements, String image) {
         super(idBateau, nomBateau, largeurBateau, longueurBateaut);
         this.vitesseBatVoy = vitesseBatVoy;
@@ -41,9 +41,15 @@ public class BateauVoyageur extends Bateau {
 
     public String toString() {
         StringBuilder equipementsString = new StringBuilder("Liste des équipements:");
-        for (Equipement equipement : equipements) {
-            equipementsString.append("\n").append(equipement.toString());
+        if (equipements != null) {
+            for (Equipement equipement : equipements) {
+                equipementsString.append("\n").append(equipement.toString());
+            }
         }
+        else {
+            equipementsString.append("\n Aucun");
+        }
+
         return super.toString() + "\nVitesse: "+getVitesseBatVoy()+"\n"+equipementsString;
     }
 }

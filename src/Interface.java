@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,7 +17,7 @@ public class Interface extends JFrame {
     private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font REGULAR_FONT = new Font("Segoe UI", Font.PLAIN, 12);
 
-    public Interface(List<BateauVoyageur> bateaux) {
+    public Interface(HashMap<Integer, BateauVoyageur> bateaux) {
         setTitle("Flotte Marieteam");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -63,7 +64,7 @@ public class Interface extends JFrame {
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         comboBox.addItem(null);
-        for (BateauVoyageur b : bateaux) comboBox.addItem(b);
+        for (BateauVoyageur b : bateaux.values()) comboBox.addItem(b);
         comboBox.setRenderer(new BateauRenderer());
         leftPanel.add(comboBox);
         leftPanel.add(Box.createVerticalStrut(15));
@@ -235,9 +236,12 @@ public class Interface extends JFrame {
                     largeurField.setText(String.valueOf(b.getLargeurBateau()));
                     vitesseField.setText(String.valueOf(b.getVitesseBatVoy()));
                     equipListPanel.removeAll();
-                    for (Equipement equip : b.getEquipements()) {
-                        addEquipmentToList(equipListPanel, equip.toString());
+                    if( b.getEquipements() != null && !b.getEquipements().isEmpty()) {
+                        for (Equipement equip : b.getEquipements()) {
+                            addEquipmentToList(equipListPanel, equip.toString());
+                        }
                     }
+
 
                     try {
                         URL resource = (Objects.requireNonNull(getClass().getResource(b.getImage())));
@@ -315,11 +319,40 @@ public class Interface extends JFrame {
 
         buttonSave.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Interface.this,
-                        "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
-                                "Les modifications ont été sauvegardées.</div></html>",
-                        "Sauvegarde",
-                        JOptionPane.INFORMATION_MESSAGE);
+                DatabaseQuery databaseQuery = new DatabaseQuery();
+                BateauVoyageur b = (BateauVoyageur) comboBox.getSelectedItem();
+                String nomBateau = nameField.getText().trim();
+                Double longueurBateau = Double.parseDouble(longueurField.getText().trim());
+                Double largeurBateau = Double.parseDouble(largeurField.getText().trim());
+                Double vitesseBatVoy = Double.parseDouble(vitesseField.getText().trim());
+                if (nomBateau.isEmpty() || longueurBateau < 0 || largeurBateau < 0 || vitesseBatVoy < 0) {
+                    JOptionPane.showMessageDialog(Interface.this,
+                            "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                    "Veuillez remplir tous les champs.</div></html>",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                Boolean update= databaseQuery.updateBateau(b.getIdBateau(), nomBateau, longueurBateau, largeurBateau,vitesseBatVoy);
+                if(update) {
+                    BateauVoyageur bateau = new BateauVoyageur(b.getIdBateau(), nomBateau,largeurBateau,longueurBateau,vitesseBatVoy,null,"/imageAccueil.jpg");
+                    bateaux.put(b.getIdBateau(), bateau);
+                    ((BateauVoyageur) comboBox.getSelectedItem()).setNomBateau(nomBateau);
+                    JOptionPane.showMessageDialog(Interface.this,
+                            "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                    "Les modifications ont été sauvegardées.</div></html>",
+                            "Sauvegarde",
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                }
+                else {
+                    JOptionPane.showMessageDialog(Interface.this,
+                            "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                    "Une erreur est survenue lors de la sauvegarde des modifications.</div></html>",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+
             }
         });
         // Logique pour l'ajout d'équipement

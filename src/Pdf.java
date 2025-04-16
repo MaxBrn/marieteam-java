@@ -6,12 +6,13 @@ import com.itextpdf.text.pdf.draw.LineSeparator;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 public class Pdf {
 
-    public static void createPdf(String path, List<BateauVoyageur> bateaux) throws IOException, DocumentException {
+    public static void createPdf(String path, HashMap<Integer,BateauVoyageur> bateaux) throws IOException, DocumentException {
         // Création du document avec des marges
         Document document = new Document();
         document.setMargins(0, 0, 110, 100);  // Marges pour le document
@@ -33,7 +34,7 @@ public class Pdf {
         document.add(Chunk.NEWLINE);
 
         // Parcourir la liste des bateaux et ajouter leur description avec l'image
-        for (BateauVoyageur bateauVoyageur : bateaux) {
+        for (BateauVoyageur bateauVoyageur : bateaux.values()) {
             // Créer un tableau pour disposer le descriptif et l'image côte à côte
             PdfPTable table = new PdfPTable(2);  // Deux colonnes (descriptif et image)
             table.setWidthPercentage(80); // 100% de la largeur du document

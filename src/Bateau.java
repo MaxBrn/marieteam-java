@@ -1,12 +1,12 @@
 import java.util.Scanner;
 
 public class Bateau {
-    private String idBateau;
+    private Integer idBateau;
     private String nomBateau;
     private double largeurBateau;
     private double longueurBateau;
 
-    public Bateau(String idBateau, String nomBateau, double largeurBateau, double longueurBateau) {
+    public Bateau(Integer idBateau, String nomBateau, double largeurBateau, double longueurBateau) {
         this.idBateau = idBateau;
         this.nomBateau = nomBateau;
         this.largeurBateau = largeurBateau;
@@ -27,11 +27,11 @@ public class Bateau {
         this.largeurBateau = largeurBateau;
     }
 
-    public String getIdBateau() {
+    public Integer getIdBateau() {
         return idBateau;
     }
 
-    public void setIdBateau(String idBateau) {
+    public void setIdBateau(Integer idBateau) {
         this.idBateau = idBateau;
     }
 

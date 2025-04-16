@@ -1,9 +1,12 @@
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.sql.Connection;
+import java.sql.SQLException;
 public class Main {
     public static void main(String[] args) {
+        /*
         // Création des équipements
         Equipement equipement1 = new Equipement("1", "Boué");
         Equipement equipement2 = new Equipement("2", "Echelle");
@@ -44,11 +47,15 @@ public class Main {
         bateauVoyageurs.add(bateauVoyageur2);
         bateauVoyageurs.add(bateauVoyageur3);
         bateauVoyageurs.add(bateauVoyageur4);
-        bateauVoyageurs.add(bateauVoyageur5);
+        bateauVoyageurs.add(bateauVoyageur5);*/
+        DatabaseQuery databaseQuery = new DatabaseQuery();
+        HashMap<Integer, BateauVoyageur> bateaux = new HashMap<>();
+        bateaux = databaseQuery.SelectAllBateau();
+        HashMap<Integer, BateauVoyageur> finalBateaux = bateaux;
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Interface(bateauVoyageurs);  // Création de la fenêtre graphique
+                new Interface(finalBateaux);  // Création de la fenêtre graphique
             }
         });
     }
