@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +17,11 @@ public class Interface extends JFrame {
     private static final Color ACCENT_COLOR = new Color(0, 150, 136);
     private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 14);
     private static final Font REGULAR_FONT = new Font("Segoe UI", Font.PLAIN, 12);
+    private JComboBox<Equipement> equipementComboBox;
+    private JPanel equipListPanel;
+    private List<Equipement> currentEquipements;
 
-    public Interface(HashMap<Integer, BateauVoyageur> bateaux) {
+    public Interface(HashMap<Integer, BateauVoyageur> bateaux, List<Equipement> equipementsDispo) {
         setTitle("Flotte Marieteam");
         setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -124,7 +128,7 @@ public class Interface extends JFrame {
         formPanel.add(measureFieldPanel);
         formPanel.add(Box.createVerticalStrut(10));
 
-        // Équipements - interface avec boutons de suppression intégrés
+        // Équipements - avec sélection depuis ComboBox
         JLabel equipLabel = createFieldLabel("Équipements");
         formPanel.add(equipLabel);
 
@@ -134,18 +138,29 @@ public class Interface extends JFrame {
         addEquipPanel.setMaximumSize(new Dimension(280, 30));
         addEquipPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextField newEquipField = createStyledTextField();
+// ComboBox pour les équipements disponibles
+        equipementComboBox = new JComboBox<>();
+        equipementComboBox.setFont(REGULAR_FONT);
+        equipementComboBox.setBackground(Color.WHITE);
+        equipementComboBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+// Initialisation de currentEquipements
+        currentEquipements = new ArrayList<>();
+
+// Bouton d'ajout
         JButton addEquipButton = createStyledButton("", Color.WHITE, "/icons/addBlue.png");
         addEquipButton.setPreferredSize(new Dimension(30, 30));
 
-        addEquipPanel.add(newEquipField, BorderLayout.CENTER);
+        addEquipPanel.add(equipementComboBox, BorderLayout.CENTER);
         addEquipPanel.add(addEquipButton, BorderLayout.EAST);
 
         formPanel.add(addEquipPanel);
         formPanel.add(Box.createVerticalStrut(5));
 
 // Panel pour contenir la liste d'équipements
-        JPanel equipListPanel = new JPanel();
+        equipListPanel = new JPanel();
         equipListPanel.setLayout(new BoxLayout(equipListPanel, BoxLayout.Y_AXIS));
         equipListPanel.setBackground(Color.WHITE);
 
@@ -155,9 +170,6 @@ public class Interface extends JFrame {
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         equipScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
         equipScroll.setMaximumSize(new Dimension(280, 120));
-
-        formPanel.add(equipScroll);
-        formPanel.add(Box.createVerticalStrut(20));
 
         formPanel.add(equipScroll);
         formPanel.add(Box.createVerticalStrut(20));
@@ -224,9 +236,12 @@ public class Interface extends JFrame {
                     longueurField.setText("");
                     largeurField.setText("");
                     vitesseField.setText("");
-                    equipListPanel.removeAll(); // Effacer tous les équipements
-                    equipListPanel.revalidate();
-                    equipListPanel.repaint();
+
+                    // Réinitialiser les équipements
+                    equipListPanel.removeAll();
+                    currentEquipements.clear();
+                    updateEquipementComboBox(equipementsDispo);
+
                     imageLabel.setText("Sélectionnez un bateau");
                     imageLabel.setIcon(null);
                 } else {
@@ -235,13 +250,21 @@ public class Interface extends JFrame {
                     longueurField.setText(String.valueOf(b.getLongueurBateau()));
                     largeurField.setText(String.valueOf(b.getLargeurBateau()));
                     vitesseField.setText(String.valueOf(b.getVitesseBatVoy()));
+
+                    // Réinitialiser la liste des équipements
                     equipListPanel.removeAll();
-                    if( b.getEquipements() != null && !b.getEquipements().isEmpty()) {
+                    currentEquipements.clear();
+
+                    // Charger les équipements du bateau
+                    if (b.getEquipements() != null && !b.getEquipements().isEmpty()) {
                         for (Equipement equip : b.getEquipements()) {
-                            addEquipmentToList(equipListPanel, equip.toString());
+                            currentEquipements.add(equip);
+                            addEquipmentToList(equipListPanel, equip);
                         }
                     }
 
+                    // Mettre à jour la ComboBox des équipements disponibles
+                    updateEquipementComboBox(equipementsDispo);
 
                     try {
                         URL resource = (Objects.requireNonNull(getClass().getResource(b.getImage())));
@@ -340,15 +363,36 @@ public class Interface extends JFrame {
                         return;
                     }
 
-                    Boolean update = databaseQuery.updateBateau(b.getIdBateau(), nomBateau, largeurBateau, longueurBateau
-                            , vitesseBatVoy, image);
-                    if(update) {
+                    // Mise à jour du bateau
+                    Boolean update = databaseQuery.updateBateau(b.getIdBateau(), nomBateau, largeurBateau, longueurBateau,
+                            vitesseBatVoy, image);
+
+                    if (update) {
                         // Mise à jour complète de l'objet
                         b.setNomBateau(nomBateau);
                         b.setLongueurBateau(longueurBateau);
                         b.setLargeurBateau(largeurBateau);
                         b.setVitesseBatVoy(vitesseBatVoy);
                         b.setImage(image);
+
+                        // Mise à jour des équipements
+                        // D'abord supprimer tous les équipements existants pour ce bateau
+                        databaseQuery.deleteAllEquipements(b.getIdBateau());
+
+                        // Puis ajouter les nouveaux équipements
+                        boolean allEquipmentsSaved = true;
+                        for (Equipement equip : currentEquipements) {
+                            boolean saved = databaseQuery.addEquipementToBateau(
+                                    b.getIdBateau(),
+                                    equip.getIdEquip()
+                            );
+                            if (!saved) {
+                                allEquipmentsSaved = false;
+                            }
+                        }
+
+                        // Mettre à jour la liste des équipements dans l'objet bateau
+                        b.setEquipements(new ArrayList<>(currentEquipements));
 
                         // Mettre à jour l'objet dans la HashMap
                         bateaux.put(b.getIdBateau(), b);
@@ -359,9 +403,17 @@ public class Interface extends JFrame {
                         comboBox.insertItemAt(b, selectedIndex);
                         comboBox.setSelectedIndex(selectedIndex);
 
+                        String message = "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
+                                "Les modifications ont été sauvegardées.";
+
+                        if (!allEquipmentsSaved) {
+                            message += "<br><br><span style='color:orange'>Attention: Certains équipements n'ont pas pu être sauvegardés.</span>";
+                        }
+
+                        message += "</div></html>";
+
                         JOptionPane.showMessageDialog(Interface.this,
-                                "<html><div style='font-family:Segoe UI;font-size:12pt;padding:10px'>" +
-                                        "Les modifications ont été sauvegardées.</div></html>",
+                                message,
                                 "Sauvegarde",
                                 JOptionPane.INFORMATION_MESSAGE);
                     } else {
@@ -384,10 +436,21 @@ public class Interface extends JFrame {
         addEquipButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String newEquip = newEquipField.getText().trim();
-                if (!newEquip.isEmpty()) {
-                    addEquipmentToList(equipListPanel, newEquip);
-                    newEquipField.setText("");
+                Equipement selectedEquip = (Equipement) equipementComboBox.getSelectedItem();
+                if (selectedEquip != null) {
+                    // Ajouter l'équipement à la liste courante
+                    currentEquipements.add(selectedEquip);
+
+                    // Ajouter à la liste visuelle
+                    addEquipmentToList(equipListPanel, selectedEquip);
+
+                    // Retirer l'élément de la ComboBox
+                    equipementComboBox.removeItem(selectedEquip);
+
+                    // Si la ComboBox est vide, désactiver le bouton d'ajout
+                    if (equipementComboBox.getItemCount() == 0) {
+                        addEquipButton.setEnabled(false);
+                    }
                 }
             }
         });
@@ -396,12 +459,38 @@ public class Interface extends JFrame {
     }
 
 
-    private void addEquipmentToList(JPanel container, String equipment) {
+    /**
+     * Met à jour la ComboBox des équipements disponibles en excluant ceux déjà attribués
+     */
+    private void updateEquipementComboBox(List<Equipement> allEquipements) {
+        equipementComboBox.removeAllItems();
+
+        for (Equipement equip : allEquipements) {
+            boolean alreadyPresent = false;
+            for (Equipement current : currentEquipements) {
+                if (current.getIdEquip() == equip.getIdEquip()) {
+                    alreadyPresent = true;
+                    break;
+                }
+            }
+            if (!alreadyPresent) {
+                equipementComboBox.addItem(equip);
+            }
+        }
+
+        boolean hasItems = equipementComboBox.getItemCount() > 0;
+        equipementComboBox.setEnabled(hasItems);
+    }
+
+    /**
+     * Ajoute un équipement à la liste visuelle
+     */
+    private void addEquipmentToList(JPanel container, Equipement equipment) {
         JPanel itemPanel = new JPanel(new BorderLayout(5, 0));
         itemPanel.setBackground(Color.WHITE);
         itemPanel.setMaximumSize(new Dimension(260, 25));
 
-        JLabel itemLabel = new JLabel(equipment);
+        JLabel itemLabel = new JLabel(equipment.toString());
         itemLabel.setFont(REGULAR_FONT);
 
         JButton deleteButton = createStyledButton("", Color.white, "/icons/trash.png");
@@ -409,9 +498,19 @@ public class Interface extends JFrame {
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Retirer de la liste
+                currentEquipements.remove(equipment);
+
+                // Retirer visuellement
                 container.remove(itemPanel);
                 container.revalidate();
                 container.repaint();
+
+                // Rajouter dans la ComboBox des équipements disponibles
+                equipementComboBox.addItem(equipment);
+
+                // Réactiver les contrôles si nécessaire
+                equipementComboBox.setEnabled(true);
             }
         });
 

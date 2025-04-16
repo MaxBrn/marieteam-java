@@ -52,10 +52,11 @@ public class Main {
         HashMap<Integer, BateauVoyageur> bateaux = new HashMap<>();
         bateaux = databaseQuery.SelectAllBateau();
         HashMap<Integer, BateauVoyageur> finalBateaux = bateaux;
+        List<Equipement> equipementDispo = DatabaseQuery.SelectAllEquipement();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Interface(finalBateaux);  // Création de la fenêtre graphique
+                new Interface(finalBateaux, equipementDispo);  // Création de la fenêtre graphique
             }
         });
     }

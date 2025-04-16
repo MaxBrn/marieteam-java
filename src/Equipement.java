@@ -1,8 +1,8 @@
 public class Equipement {
-    private String idEquip;
+    private Integer idEquip;
     private String libEquip;
 
-    public Equipement(String idEquip, String libEquip) {
+    public Equipement(Integer idEquip, String libEquip) {
         this.idEquip = idEquip;
         this.libEquip = libEquip;
     }
@@ -11,11 +11,11 @@ public class Equipement {
         return getLibEquip();
     }
 
-    public String getIdEquip() {
+    public Integer getIdEquip() {
         return idEquip;
     }
 
-    public void setIdEquip(String idEquip) {
+    public void setIdEquip(Integer idEquip) {
         this.idEquip = idEquip;
     }
 
