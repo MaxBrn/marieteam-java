@@ -20,6 +20,7 @@ public class Interface extends JFrame {
     private JComboBox<Equipement> equipementComboBox;
     private JPanel equipListPanel;
     private List<Equipement> currentEquipements;
+    private JPanel formPanel; // Référence au formPanel pour pouvoir le masquer/afficher
 
     public Interface(HashMap<Integer, BateauVoyageur> bateaux, List<Equipement> equipementsDispo) {
         setTitle("Flotte Marieteam");
@@ -63,6 +64,7 @@ public class Interface extends JFrame {
         comboBox.setFont(REGULAR_FONT);
         comboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
         comboBox.setPreferredSize(new Dimension(280, 30));
+        comboBox.setMaximumSize(new Dimension(280, 30));
         comboBox.setBackground(Color.WHITE);
         comboBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
@@ -74,11 +76,12 @@ public class Interface extends JFrame {
         leftPanel.add(Box.createVerticalStrut(15));
 
         // Container pour les champs - garantit un alignement parfait
-        JPanel formPanel = new JPanel();
+        formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         formPanel.setBackground(Color.WHITE);
         formPanel.setMaximumSize(new Dimension(280, Integer.MAX_VALUE));
+        formPanel.setVisible(false); // Masqué par défaut car aucun bateau n'est sélectionné initialement
 
         // Champ Nom
         JLabel nameLabel = createFieldLabel("Nom du bateau");
@@ -128,28 +131,53 @@ public class Interface extends JFrame {
         formPanel.add(measureFieldPanel);
         formPanel.add(Box.createVerticalStrut(10));
 
-        // Équipements - avec sélection depuis ComboBox
-        JLabel equipLabel = createFieldLabel("Équipements");
-        formPanel.add(equipLabel);
-
-// Panel pour l'ajout d'équipements
+        // Panel pour l'ajout d'équipements - Sans le label "Équipements"
         JPanel addEquipPanel = new JPanel(new BorderLayout(5, 0));
         addEquipPanel.setBackground(Color.WHITE);
         addEquipPanel.setMaximumSize(new Dimension(280, 30));
         addEquipPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-// ComboBox pour les équipements disponibles
+        // ComboBox pour les équipements disponibles avec placeholder
         equipementComboBox = new JComboBox<>();
         equipementComboBox.setFont(REGULAR_FONT);
         equipementComboBox.setBackground(Color.WHITE);
         equipementComboBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        // Utiliser un renderer personnalisé avec placeholder
+        equipementComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                label.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
 
-// Initialisation de currentEquipements
+                if (value == null && index == -1) {
+                    // C'est l'élément affiché quand rien n'est sélectionné (placeholder)
+                    label.setText("Ajouter un équipement");
+                    label.setForeground(new Color(120, 120, 120));
+                } else if (value == null) {
+                    label.setText("Sélectionner un équipement");
+                } else {
+                    label.setText(value.toString());
+                }
+
+                if (isSelected) {
+                    label.setBackground(PRIMARY_COLOR);
+                    label.setForeground(Color.WHITE);
+                } else if (index != -1) {
+                    label.setBackground(Color.WHITE);
+                    label.setForeground(Color.BLACK);
+                }
+
+                return label;
+            }
+        });
+
+        // Initialisation de currentEquipements
         currentEquipements = new ArrayList<>();
 
-// Bouton d'ajout
+        // Bouton d'ajout
         JButton addEquipButton = createStyledButton("", Color.WHITE, "/icons/addBlue.png");
         addEquipButton.setPreferredSize(new Dimension(30, 30));
 
@@ -159,7 +187,7 @@ public class Interface extends JFrame {
         formPanel.add(addEquipPanel);
         formPanel.add(Box.createVerticalStrut(5));
 
-// Panel pour contenir la liste d'équipements
+        // Panel pour contenir la liste d'équipements
         equipListPanel = new JPanel();
         equipListPanel.setLayout(new BoxLayout(equipListPanel, BoxLayout.Y_AXIS));
         equipListPanel.setBackground(Color.WHITE);
@@ -231,6 +259,9 @@ public class Interface extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 BateauVoyageur b = (BateauVoyageur) comboBox.getSelectedItem();
                 if (b == null) {
+                    // Cacher le formulaire quand aucun bateau n'est sélectionné
+                    formPanel.setVisible(false);
+
                     nameField.setText("");
                     urlField.setText("");
                     longueurField.setText("");
@@ -245,6 +276,9 @@ public class Interface extends JFrame {
                     imageLabel.setText("Sélectionnez un bateau");
                     imageLabel.setIcon(null);
                 } else {
+                    // Afficher le formulaire quand un bateau est sélectionné
+                    formPanel.setVisible(true);
+
                     nameField.setText(b.getNomBateau());
                     urlField.setText(b.getImage());
                     longueurField.setText(String.valueOf(b.getLongueurBateau()));
@@ -301,6 +335,11 @@ public class Interface extends JFrame {
                         imageLabel.setIcon(null);
                     }
                 }
+
+                // Important : Mettre à jour l'UI pour refléter la visibilité du formPanel
+                leftPanel.revalidate();
+                leftPanel.repaint();
+
                 imagePanel.revalidate();
                 imagePanel.repaint();
             }
@@ -447,9 +486,9 @@ public class Interface extends JFrame {
                     // Retirer l'élément de la ComboBox
                     equipementComboBox.removeItem(selectedEquip);
 
-                    // Si la ComboBox est vide, désactiver le bouton d'ajout
-                    if (equipementComboBox.getItemCount() == 0) {
-                        addEquipButton.setEnabled(false);
+                    // Si après suppression il ne reste que l'élément null, désactiver le comboBox
+                    if (equipementComboBox.getItemCount() == 1) { // Seulement l'élément null
+                        equipementComboBox.setEnabled(false);
                     }
                 }
             }
@@ -465,6 +504,9 @@ public class Interface extends JFrame {
     private void updateEquipementComboBox(List<Equipement> allEquipements) {
         equipementComboBox.removeAllItems();
 
+        // Ajouter d'abord l'élément null pour le placeholder
+        equipementComboBox.addItem(null);
+
         for (Equipement equip : allEquipements) {
             boolean alreadyPresent = false;
             for (Equipement current : currentEquipements) {
@@ -478,7 +520,7 @@ public class Interface extends JFrame {
             }
         }
 
-        boolean hasItems = equipementComboBox.getItemCount() > 0;
+        boolean hasItems = equipementComboBox.getItemCount() > 1; // Maintenant > 1 car on a l'élément null
         equipementComboBox.setEnabled(hasItems);
     }
 
@@ -509,7 +551,7 @@ public class Interface extends JFrame {
                 // Rajouter dans la ComboBox des équipements disponibles
                 equipementComboBox.addItem(equipment);
 
-                // Réactiver les contrôles si nécessaire
+                // Réactiver les contrôles
                 equipementComboBox.setEnabled(true);
             }
         });
@@ -522,8 +564,6 @@ public class Interface extends JFrame {
         container.revalidate();
         container.repaint();
     }
-
-
 
     // Méthodes d'assistance pour la création de composants stylisés
     private JLabel createFieldLabel(String text) {
@@ -590,7 +630,6 @@ public class Interface extends JFrame {
 
         return button;
     }
-
 
     // Fonction pour assombrir une couleur
     private Color darken(Color color, float fraction) {
