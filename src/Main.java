@@ -1,62 +1,54 @@
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.sql.Connection;
-import java.sql.SQLException;
+
+/**
+ * ============================================================================
+ * CLASSE PRINCIPALE - POINT D'ENTRÉE DE L'APPLICATION
+ * ============================================================================
+ *
+ * Cette classe contient la méthode main() qui lance l'application de gestion
+ * des bateaux voyageurs. Elle initialise les données depuis la base de données
+ * et démarre l'interface graphique Swing.
+ */
 public class Main {
+
+    /**
+     * Point d'entrée principal de l'application
+     * @param args Arguments de la ligne de commande (non utilisés)
+     */
     public static void main(String[] args) {
-        /*
-        // Création des équipements
-        Equipement equipement1 = new Equipement("1", "Boué");
-        Equipement equipement2 = new Equipement("2", "Echelle");
-        Equipement equipement3 = new Equipement("3", "Aviron");
-        Equipement equipement4 = new Equipement("4", "Rame");
-        Equipement equipement5 = new Equipement("5", "Pompe");
 
-        // Création des équipements pour chaque bateau
-        List<Equipement> equipementList1 = new ArrayList<>();
-        equipementList1.add(equipement1);
-        equipementList1.add(equipement2);
-
-        List<Equipement> equipementList2 = new ArrayList<>();
-        equipementList2.add(equipement3);
-        equipementList2.add(equipement4);
-
-        List<Equipement> equipementList3 = new ArrayList<>();
-        equipementList3.add(equipement5);
-
-        List<Equipement> equipementList4 = new ArrayList<>();
-        equipementList4.add(equipement1);
-        equipementList4.add(equipement3);
-
-        List<Equipement> equipementList5 = new ArrayList<>();
-        equipementList5.add(equipement2);
-        equipementList5.add(equipement5);
-
-        // Création des bateaux
-        BateauVoyageur bateauVoyageur1 = new BateauVoyageur("1", "Boaty", 5.13, 3.3, 40, equipementList1, "/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur2 = new BateauVoyageur("2", "Goaty", 4.13, 3.13, 50, equipementList2, "/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur3 = new BateauVoyageur("3", "Saily", 6.5, 3.8, 60, equipementList3, "/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur4 = new BateauVoyageur("4", "Wavey", 5.8, 3.5, 55, equipementList4, "/imageAccueil.jpg");
-        BateauVoyageur bateauVoyageur5 = new BateauVoyageur("5", "Splashy", 4.5, 3.0, 45, equipementList5, "/imageAccueil.jpg");
-
-        // Liste des bateaux
-        List<BateauVoyageur> bateauVoyageurs = new ArrayList<>();
-        bateauVoyageurs.add(bateauVoyageur1);
-        bateauVoyageurs.add(bateauVoyageur2);
-        bateauVoyageurs.add(bateauVoyageur3);
-        bateauVoyageurs.add(bateauVoyageur4);
-        bateauVoyageurs.add(bateauVoyageur5);*/
+        // === INITIALISATION DE L'ACCÈS AUX DONNÉES ===
+        // Création de l'objet qui gère les requêtes vers la base de données
         DatabaseQuery databaseQuery = new DatabaseQuery();
+
+        // === CHARGEMENT DES BATEAUX DEPUIS LA BASE DE DONNÉES ===
+        // HashMap pour stocker les bateaux avec leur ID comme clé
         HashMap<Integer, BateauVoyageur> bateaux = new HashMap<>();
+
+        // Récupération de tous les bateaux depuis la base de données
         bateaux = databaseQuery.SelectAllBateau();
+
+        // Création d'une référence finale pour utilisation dans la classe anonyme
+        // (nécessaire car les variables locales utilisées dans les classes anonymes
+        // doivent être finales ou effectivement finales)
         HashMap<Integer, BateauVoyageur> finalBateaux = bateaux;
+
+        // === CHARGEMENT DES ÉQUIPEMENTS DISPONIBLES ===
+        // Récupération de la liste de tous les équipements depuis la base de données
+        // Méthode statique, pas besoin d'instance de DatabaseQuery
         List<Equipement> equipementDispo = DatabaseQuery.SelectAllEquipement();
+
+        // === LANCEMENT DE L'INTERFACE GRAPHIQUE ===
+        // SwingUtilities.invokeLater() garantit que l'interface graphique sera créée
+        // sur l'Event Dispatch Thread (EDT), ce qui est obligatoire pour Swing
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Interface(finalBateaux, equipementDispo);  // Création de la fenêtre graphique
+                // Création et affichage de la fenêtre principale de l'application
+                // Passage des données chargées (bateaux et équipements) au constructeur
+                new Interface(finalBateaux, equipementDispo);
             }
         });
     }
