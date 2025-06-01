@@ -108,8 +108,6 @@ public class DatabaseQuery {
         try {
             // Obtention de la connexion
             Connection conn = DatabaseConnection.getConnection();
-            System.out.println("✅ Connexion réussie à Supabase !");
-            System.out.println(id); // Debug : affichage de l'ID
 
             String query = "UPDATE bateau SET nom = '" + nom + "', largeur = " + largeur +
                     ", longueur = " + longueur + ", vitesse = " + vitesse + ", ImageUrl = '" + image + "'" +
@@ -129,13 +127,11 @@ public class DatabaseQuery {
                 return rowsAffected > 0;
 
             } catch (SQLException e) {
-                System.err.println("❌ Erreur lors de la mise à jour : " + e.getMessage());
                 e.printStackTrace();
                 return false; // Échec de l'opération
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Erreur de connexion : " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -158,7 +154,6 @@ public class DatabaseQuery {
 
         try {
             Connection conn = DatabaseConnection.getConnection();
-            System.out.println("✅ Connexion réussie à Supabase !");
 
             Statement statement = conn.createStatement();
             String query = "SELECT * FROM equipement";
@@ -176,14 +171,12 @@ public class DatabaseQuery {
                     equipements.add(equipement);
                 }
             } catch (SQLException e) {
-                System.out.println("❌ Erreur de connexion ou d'exécution de la requête : " + e.getMessage());
                 e.printStackTrace();
             }
 
             conn.close();
 
         } catch (SQLException e) {
-            System.out.println("❌ Erreur de connexion : " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -205,7 +198,6 @@ public class DatabaseQuery {
 
         try {
             Connection conn = DatabaseConnection.getConnection();
-            System.out.println("✅ Connexion réussie à Supabase !");
 
             Statement statement = conn.createStatement();
 
@@ -223,14 +215,12 @@ public class DatabaseQuery {
                     equipements.add(equipement);
                 }
             } catch (SQLException e) {
-                System.out.println("❌ Erreur de connexion ou d'exécution de la requête : " + e.getMessage());
                 e.printStackTrace();
             }
 
             conn.close();
 
         } catch (SQLException e) {
-            System.out.println("❌ Erreur de connexion : " + e.getMessage());
             e.printStackTrace();
         }
 
